@@ -1,0 +1,10 @@
+@mixin mq{
+    @media screen and (max-width:768px){
+        @content;
+    }
+}
+@mixin mqB{
+    @media screen and (min-width:769px){
+        @content;
+    }
+}
