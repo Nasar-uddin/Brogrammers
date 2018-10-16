@@ -16,6 +16,7 @@
                 </div>
             </div>
         @endforeach
+        {{$posts->links()}}
     </div>
     {{-- Show popular items --}}
     @include('inc.popular')

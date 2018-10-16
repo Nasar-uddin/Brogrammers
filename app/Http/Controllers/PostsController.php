@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Post;
+use App\Catagory;
+use Illuminate\Support\Facades\Storage;
+
 class PostsController extends Controller
 {
     /**
@@ -16,7 +19,7 @@ class PostsController extends Controller
     }
     public function index()
     {
-        $posts = Post::orderBy('created_at','desc')->get();
+        $posts = Post::orderBy('created_at','desc')->paginate(10);
         return view('posts.index')->with('posts',$posts);
     }
 
@@ -27,7 +30,8 @@ class PostsController extends Controller
      */
     public function create()
     {
-        return view('posts.create');
+        $catagories = Catagory::all();
+        return view('posts.create')->with('catagories',$catagories);
     }
 
     /**
@@ -41,10 +45,26 @@ class PostsController extends Controller
         $request->validate([
             'title'=>'required',
             'body' => 'required',
+            'catagory' => 'required',
             'image' => 'image|nullable|max:1999'
         ]);
-
-        return $request;
+        if($request->hasFile('image')){
+            $imageNameWithExt = $request->file('image')->getClientOriginalName();
+            $imageName = pathinfo($imageNameWithExt,PATHINFO_FILENAME);
+            $imageExt = $request->file('image')->getClientOriginalExtension();
+            $imageNameToSave = $imageName.'_'.time().'.'.$imageExt;
+            $path = $request->file('image')->storeAs('public/cover-img',$imageNameToSave);
+        }else{
+            $imageNameToSave = 'noimage.png';
+        }
+        $post = new Post();
+        $post->title = $request->input('title');
+        $post->body = $request->input('body');
+        $post->catagory_id = $request->input('catagory');
+        $post->user_id = auth()->user()->id;
+        $post->image = $imageNameToSave;
+        $post->save();
+        return redirect('/posts')->with('success','Post has been created');
     }
 
     /**
@@ -91,6 +111,13 @@ class PostsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::find($id);
+        if(auth()->user()->id==$post->user_id){
+            Storage::delete('public/cover-img'.$post->image);
+            $post->delete();
+            return redirect('/posts')->with('success','Post has been deleted');
+        }
+        else
+            return redirect('/posts')->with('error','Unauthorized accesss');
     }
 }

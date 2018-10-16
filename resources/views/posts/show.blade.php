@@ -2,17 +2,35 @@
 @section('content')
     <div class="col-sm-10">
     	<div class="well row card">
-            <h1>{{$post->title}}</h1>
-            <hr>
-            <div class="post-meta">
-                <a href="#" class="meta-item">{{ $post->user->name }}</a>
-                on {{ $post->created_at }}
-            </div>
-            <hr>
-            <p>{{$post->body}}</p>
-            <div class="col-sm-8 col-xs-push-2 col-sm-push-2">
+            <div class="col-sm-12">
+                
+                <div class="post-meta pull-right">
+                    <strong><a href="#" class="meta-item">{{$post->catagory->catagory}}</a>. </strong>
+                    posted by 
+                    <strong><a href="#" class="meta-item">{{ $post->user->name }}</a></strong>
+                    on {{ $post->created_at }}
+                </div>
+                <hr>
+                <h1>{{$post->title}}</h1>
+                <hr>
                 <img class="img-responsive" src="/storage/cover-img/{{ $post->image}}" alt="{{$post->image}}">
+                <hr>
             </div>
+            <div class="col-sm-12">
+                <p>{!! $post->body !!}</p>
+                <hr>
+            </div>
+            @if(!Auth::guest()&& Auth::user()->id == $post->user_id)
+            <div class="col-sm-12">
+                <hr>
+                <a href="#" class="btn btn-primary">Edit post</a>
+                <form action="{{route('posts.destroy',$post->id)}}" method="POST" class="pull-right">
+                    {{ csrf_field() }}
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button class="btn btn-danger">Delete post</button>
+                </form>
+            </div>
+            @endif
         </div>
     </div>
     {{-- Show popular items --}}

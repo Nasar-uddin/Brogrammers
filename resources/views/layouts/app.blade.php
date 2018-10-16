@@ -17,10 +17,15 @@
     <div id="app">
             @include('inc.navbar')
             <div class="container">
-            <div class="row">
-                @yield('content')
-            </div>
-            @include('inc.footer')
+                <div class="row">
+                    <div class="col-sm-10">
+                        @include('inc.message')
+                    </div>
+                </div>
+                <div class="row">
+                    @yield('content')
+                </div>
+                @include('inc.footer')
     </div>
 
     <!-- Scripts -->
