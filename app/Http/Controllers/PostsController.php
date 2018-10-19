@@ -15,7 +15,7 @@ class PostsController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function __construct(){
-        $this->middleware('auth')->except(['index','show']);
+        $this->middleware('auth')->except(['index','show','byuser','bycatagory']);
     }
     public function index()
     {
@@ -88,7 +88,11 @@ class PostsController extends Controller
      */
     public function edit($id)
     {
-        //
+        $post = Post::find($id);
+        if(auth()->user()->id!=$post->user_id)
+            return redirect('/posts')->with('error','Unauthroized access');
+        else
+            return view('posts.edit' ,compact('post'));
     }
 
     /**
@@ -100,7 +104,30 @@ class PostsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'title'=>'required',
+            'body' => 'required',
+            'image' => 'image|nullable|max:1999'
+        ]);
+        $post = Post::find($id);
+        if(auth()->user()->id!=$post->user_id){
+            return redirect('/posts')->with('error','Don\'t Fuck with your dad');
+        }
+        if($request->hasFile('image')){
+            $image = $request->file('image');
+            $imageNameWithExt = $image->getClientOriginalName();
+            $imageName = pathinfo($imageNameWithExt,PATHINFO_FILENAME);
+            $imageExt = $image->getClientOriginalExtension();
+            if($post->image!='noimage.png')
+                Storage::delete('/public/cover-img/'.$post->image);
+            $imageNameToSave = $imageName.'_'.time().'.'.$imageExt;
+            $path = $request->file('image')->storeAs('public/cover-img',$imageNameToSave);
+            $post->image = $imageNameToSave;
+        }
+        $post->title = $request->input('title');
+        $post->body = $request->input('body');
+        $post->save();
+        return redirect('/posts')->with('success','Post has been updated');
     }
 
     /**
@@ -113,11 +140,20 @@ class PostsController extends Controller
     {
         $post = Post::find($id);
         if(auth()->user()->id==$post->user_id){
-            Storage::delete('public/cover-img'.$post->image);
+            if($post->image!='noimage.png')
+                Storage::delete('/public/cover-img/'.$post->image);
             $post->delete();
             return redirect('/posts')->with('success','Post has been deleted');
         }
         else
             return redirect('/posts')->with('error','Unauthorized accesss');
+    }
+    public function byuser($id){
+        $posts = Post::where('user_id',$id)->orderBy('created_at','desc')->paginate(3);
+        return view('posts.index')->with('posts',$posts);
+    }
+    public function bycatagory($id){
+        $posts = Post::where('catagory_id',$id)->orderBy('created_at','desc')->paginate(2);
+        return view('posts.index')->with('posts',$posts);
     }
 }

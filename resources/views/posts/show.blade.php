@@ -23,7 +23,7 @@
             @if(!Auth::guest()&& Auth::user()->id == $post->user_id)
             <div class="col-sm-12">
                 <hr>
-                <a href="#" class="btn btn-primary">Edit post</a>
+                <a href="/posts/{{$post->id}}/edit" class="btn btn-primary">Edit post</a>
                 <form action="{{route('posts.destroy',$post->id)}}" method="POST" class="pull-right">
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" value="DELETE">
