@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Post;
 use App\Catagory;
+use App\Comment;
 use Illuminate\Support\Facades\Storage;
 
 class PostsController extends Controller
@@ -30,8 +31,7 @@ class PostsController extends Controller
      */
     public function create()
     {
-        $catagories = Catagory::all();
-        return view('posts.create')->with('catagories',$catagories);
+        return view('posts.create');
     }
 
     /**
@@ -76,8 +76,9 @@ class PostsController extends Controller
     public function show($id)
     {
         $post = Post::find($id);
+        $comment = Comment::where('post_id',$post->id)->orderBy('created_at')->get();
         // return $post;
-        return view('posts.show')->with('post',$post);
+        return view('posts.show',compact('post','comment'));
     }
 
     /**

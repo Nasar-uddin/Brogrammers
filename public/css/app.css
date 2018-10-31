@@ -8468,3 +8468,8 @@ footer {
   background-color: #0ec080;
 }
 
+.table tr td:first-child a {
+  text-decoration: none;
+  color: #032303;
+}
+

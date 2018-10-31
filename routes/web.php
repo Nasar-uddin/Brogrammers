@@ -1,4 +1,5 @@
 <?php
+use App\Catagory;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,3 +19,8 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/posts/user/{id}','PostsController@byuser');
 Route::get('/posts/catagory/{id}','PostsController@bycatagory');
+Route::post('/comment','CommentsController@store');
+View::composer(['*'],function($view){
+	$catagories = Catagory::all();
+	$view->with('catagories',$catagories);
+});
